@@ -29,6 +29,8 @@ def extract_text_from_pdf(pdf_path, json_path):
             # Convert coordinates to fitz.Rect
             pdf_rect = fitz.Rect(coords[0], coords[1], coords[2], coords[3])
             text = page.get_text("text", clip=pdf_rect).strip()
+            # Remove newline characters and excessive whitespace
+            text = ' '.join(text.split())
             extracted_data.append({'name': name, 'text': text})
 
     doc.close()
