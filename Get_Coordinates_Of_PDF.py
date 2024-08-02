@@ -66,7 +66,7 @@ class PDFViewer(tk.Tk):
         if self.current_rect:
             x1, y1, x2, y2 = self.canvas.coords(self.current_rect)
             if x1 != x2 and y1 != y2:  # Ensure the rectangle is not degenerate
-                box_name = simpledialog.askstring("Box Name", "Enter a name for this box:")
+                box_name = simpledialog.askstring("Box Name", "Enter a name for the data in the box:")
                 if box_name:
                     page_key = f"page number: {self.current_page_number + 1}"
                     self.rectangles.setdefault(page_key, []).append({
