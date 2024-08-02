@@ -6,16 +6,23 @@
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import Scan_Folder_And_Extract_Data
-import Import_Document_To_Train
-import View_In_Excel
+from Import_Document_To_Train import PDFViewer 
 
 # Function to import a document
 def import_document():
-    file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf"), ("Image files", "*.png;*.jpg;*.jpeg")])
-    if file_path:
-        messagebox.showinfo("File Selected", f"Document {file_path} has been selected.")
-        # Add your document handling code here
+    pdf_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf"), ("Image files", "*.png;*.jpg;*.jpeg")])
+    if pdf_path:
+        # Hide the main window
+        root.withdraw()
+
+        def on_close_pdf_viewer():
+            # Show the main window again when PDFViewer is closed
+            root.deiconify()
+
+        # Open the PDFViewer window
+        viewer = PDFViewer(pdf_path, on_close_pdf_viewer)
+        viewer.mainloop()
+
 
 # Function to scan a folder and extract data
 def scan_folder_extract_data():

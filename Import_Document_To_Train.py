@@ -1,4 +1,3 @@
-import main
 import fitz  # PyMuPDF
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
@@ -6,9 +5,8 @@ from PIL import Image, ImageTk
 import json
 import matplotlib.pyplot as plt
 
-
-class PDFViewer(tk.Tk):
-    def __init__(self, pdf_path):
+class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
+    def __init__(self, pdf_path, on_close_callback):
         super().__init__()
         self.title("PDF Viewer")
         self.geometry("800x600")
@@ -29,6 +27,16 @@ class PDFViewer(tk.Tk):
         self.canvas.bind("<Button-1>", self.on_click)
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
+
+        # Set the close protocol
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.on_close_callback = on_close_callback
+
+    def on_close(self):
+        # Cleanup and call the provided callback function
+        self.destroy()
+        if self.on_close_callback:
+            self.on_close_callback()
 
     def create_navigation_buttons(self):
         button_frame = tk.Frame(self)
@@ -92,15 +100,18 @@ class PDFViewer(tk.Tk):
             messagebox.showinfo("Info", "No more pages to go forward.")
 
     def load_page(self):
-        self.page = self.doc.load_page(self.current_page_number)
-        self.pagemap = self.page.get_pixmap()
-        self.image = Image.frombytes("RGB", [self.pagemap.width, self.pagemap.height], self.pagemap.samples)
-        self.img_tk = ImageTk.PhotoImage(image=self.image)
+        try:
+            self.page = self.doc.load_page(self.current_page_number)
+            self.pagemap = self.page.get_pixmap()
+            self.image = Image.frombytes("RGB", [self.pagemap.width, self.pagemap.height], self.pagemap.samples)
+            self.img_tk = ImageTk.PhotoImage(image=self.image)
 
-        self.canvas.delete("all")
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.img_tk)
+            self.canvas.delete("all")
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=self.img_tk)
 
-        self.draw_rectangles()
+            self.draw_rectangles()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load page: {e}")
 
     def draw_rectangles(self):
         page_key = f"page number: {self.current_page_number + 1}"
@@ -145,10 +156,13 @@ class PDFViewer(tk.Tk):
             extracted_text.append(f"{box['name']}: {text}")
 
         if extracted_text:
-            plt.figure(figsize=(10, 7))
-            plt.text(0.5, 0.5, '\n'.join(extracted_text), fontsize=12, ha='center', wrap=True)
-            plt.axis('off')
-            plt.show()
+            self.display_extracted_text('\n'.join(extracted_text))
+
+    def display_extracted_text(self, text):
+        plt.figure(figsize=(10, 7))
+        plt.text(0.5, 0.5, text, fontsize=12, ha='center', wrap=True)
+        plt.axis('off')
+        plt.show()
 
     def save_boxes(self):
         save_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
@@ -172,12 +186,3 @@ class PDFViewer(tk.Tk):
             self.rectangles[page_key] = []
         self.canvas.delete("all")
         self.load_page()
-
-def main():
-    pdf_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
-    if pdf_path:
-        app = PDFViewer(pdf_path)
-        app.mainloop()
-
-if __name__ == "__main__":
-    main()
