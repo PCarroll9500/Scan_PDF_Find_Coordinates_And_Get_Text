@@ -6,6 +6,9 @@
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import Scan_Folder_And_Extract_Data
+import Import_Document_To_Train
+import View_In_Excel
 
 # Function to import a document
 def import_document():
