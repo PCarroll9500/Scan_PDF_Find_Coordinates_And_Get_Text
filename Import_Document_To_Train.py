@@ -106,6 +106,7 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
                         'coords': (x1, y1, x2, y2)
                     })
             self.current_rect = None
+            self.load_page()
 
     def prev_page(self):
         if self.current_page_number > 0:
