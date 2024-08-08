@@ -16,6 +16,7 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         self.rectangles = {}  # Dictionary to store rectangles with page numbers
         self.current_rect = None
         self.start_x = self.start_y = 0
+        self.zoom_scale = 1.0  # Initial zoom scale
 
         self.doc = fitz.open(pdf_path)
         self.canvas = tk.Canvas(self, bg='white')
@@ -47,6 +48,12 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
 
         next_button = tk.Button(button_frame, text="Next Page", command=self.next_page)
         next_button.pack(side=tk.LEFT)
+
+        zoom_in_button = tk.Button(button_frame, text="Zoom In", command=self.zoom_in)
+        zoom_in_button.pack(side=tk.LEFT)
+
+        zoom_out_button = tk.Button(button_frame, text="Zoom Out", command=self.zoom_out)
+        zoom_out_button.pack(side=tk.LEFT)
 
         extract_button = tk.Button(button_frame, text="Extract Text", command=self.extract_text_from_boxes)
         extract_button.pack(side=tk.LEFT)
@@ -102,7 +109,7 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
     def load_page(self):
         try:
             self.page = self.doc.load_page(self.current_page_number)
-            self.pagemap = self.page.get_pixmap()
+            self.pagemap = self.page.get_pixmap(matrix=fitz.Matrix(self.zoom_scale, self.zoom_scale))
             self.image = Image.frombytes("RGB", [self.pagemap.width, self.pagemap.height], self.pagemap.samples)
             self.img_tk = ImageTk.PhotoImage(image=self.image)
 
@@ -185,4 +192,12 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         if page_key in self.rectangles:
             self.rectangles[page_key] = []
         self.canvas.delete("all")
+        self.load_page()
+
+    def zoom_in(self):
+        self.zoom_scale *= 1.2
+        self.load_page()
+
+    def zoom_out(self):
+        self.zoom_scale /= 1.2
         self.load_page()

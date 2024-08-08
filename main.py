@@ -2,7 +2,7 @@
 #
 # By: https://github.com/PCarroll9500
 #
-# Purpose: To create a user friendlyway to mass extract data from PDF files.
+# Purpose: To create a user friendly way to mass extract data from PDF files into excel.
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
