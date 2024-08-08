@@ -140,6 +140,10 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         if page_key in self.rectangles:
             for box in self.rectangles[page_key]:
                 x1, y1, x2, y2 = box['coords']
+                x1 *= self.zoom_scale
+                y1 *= self.zoom_scale
+                x2 *= self.zoom_scale
+                y2 *= self.zoom_scale
                 self.canvas.create_rectangle(x1, y1, x2, y2, outline="red", width=2, tags=box['name'])
 
     def save_current_page_boxes(self):
