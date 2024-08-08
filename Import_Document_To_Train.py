@@ -68,20 +68,35 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         clear_button.pack(side=tk.LEFT)
 
     def on_click(self, event):
-        self.start_x = self.canvas.canvasx(event.x)
-        self.start_y = self.canvas.canvasy(event.y)
+        self.start_x = self.canvas.canvasx(event.x) / self.zoom_scale
+        self.start_y = self.canvas.canvasy(event.y) / self.zoom_scale
+
 
         if self.current_rect:
             self.canvas.delete(self.current_rect)
 
-        self.current_rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red", width=2)
+        self.current_rect = self.canvas.create_rectangle(
+                self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+                self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+                outline="red", width=2
+            )
 
     def on_drag(self, event):
-        self.canvas.coords(self.current_rect, self.start_x, self.start_y, self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+        cur_x = self.canvas.canvasx(event.x) / self.zoom_scale
+        cur_y = self.canvas.canvasy(event.y) / self.zoom_scale
+        self.canvas.coords(
+            self.current_rect,
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale,
+            cur_x * self.zoom_scale, cur_y * self.zoom_scale
+        )
 
     def on_release(self, event):
         if self.current_rect:
             x1, y1, x2, y2 = self.canvas.coords(self.current_rect)
+            x1 /= self.zoom_scale
+            y1 /= self.zoom_scale
+            x2 /= self.zoom_scale
+            y2 /= self.zoom_scale
             if x1 != x2 and y1 != y2:  # Ensure the rectangle is not degenerate
                 box_name = simpledialog.askstring("Box Name", "Enter a name for the data in the box:")
                 if box_name:
