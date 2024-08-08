@@ -71,15 +71,14 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         self.start_x = self.canvas.canvasx(event.x) / self.zoom_scale
         self.start_y = self.canvas.canvasy(event.y) / self.zoom_scale
 
-
         if self.current_rect:
             self.canvas.delete(self.current_rect)
 
         self.current_rect = self.canvas.create_rectangle(
-                self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
-                self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
-                outline="red", width=2
-            )
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+            outline="red", width=2
+        )
 
     def on_drag(self, event):
         cur_x = self.canvas.canvasx(event.x) / self.zoom_scale
@@ -110,13 +109,11 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
 
     def prev_page(self):
         if self.current_page_number > 0:
-            self.save_current_page_boxes()
             self.current_page_number -= 1
             self.load_page()
 
     def next_page(self):
         if self.current_page_number < len(self.doc) - 1:
-            self.save_current_page_boxes()
             self.current_page_number += 1
             self.load_page()
         else:
@@ -182,9 +179,6 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
             text = self.page.get_text("text", clip=pdf_rect)
             extracted_text.append(f"{box['name']}: {text}")
 
-        if extracted_text:
-            self.display_extracted_text('\n'.join(extracted_text))
-
     def display_extracted_text(self, text):
         plt.figure(figsize=(10, 7))
         plt.text(0.5, 0.5, text, fontsize=12, ha='center', wrap=True)
@@ -203,8 +197,7 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
     def delete_top_rectangle(self):
         page_key = f"page number: {self.current_page_number + 1}"
         if page_key in self.rectangles and self.rectangles[page_key]:
-            top_box = self.rectangles[page_key].pop()
-            self.canvas.delete(top_box['name'])
+            self.rectangles[page_key].pop()
         self.load_page()
 
     def clear_boxes(self):
