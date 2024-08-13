@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 import json
 import matplotlib.pyplot as plt
 
-class PDFViewer(tk.Tk):
-    def __init__(self, pdf_path):
+class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
+    def __init__(self, pdf_path, on_close_callback):
         super().__init__()
         self.title("PDF Viewer")
         self.geometry("800x600")
@@ -16,6 +16,7 @@ class PDFViewer(tk.Tk):
         self.rectangles = {}  # Dictionary to store rectangles with page numbers
         self.current_rect = None
         self.start_x = self.start_y = 0
+        self.zoom_scale = 1.0  # Initial zoom scale
 
         self.doc = fitz.open(pdf_path)
         self.canvas = tk.Canvas(self, bg='white')
@@ -28,6 +29,16 @@ class PDFViewer(tk.Tk):
         self.canvas.bind("<B1-Motion>", self.on_drag)
         self.canvas.bind("<ButtonRelease-1>", self.on_release)
 
+        # Set the close protocol
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.on_close_callback = on_close_callback
+
+    def on_close(self):
+        # Cleanup and call the provided callback function
+        self.destroy()
+        if self.on_close_callback:
+            self.on_close_callback()
+
     def create_navigation_buttons(self):
         button_frame = tk.Frame(self)
         button_frame.pack(side=tk.BOTTOM, fill=tk.X)
@@ -37,6 +48,12 @@ class PDFViewer(tk.Tk):
 
         next_button = tk.Button(button_frame, text="Next Page", command=self.next_page)
         next_button.pack(side=tk.LEFT)
+
+        zoom_in_button = tk.Button(button_frame, text="Zoom In", command=self.zoom_in)
+        zoom_in_button.pack(side=tk.LEFT)
+
+        zoom_out_button = tk.Button(button_frame, text="Zoom Out", command=self.zoom_out)
+        zoom_out_button.pack(side=tk.LEFT)
 
         extract_button = tk.Button(button_frame, text="Extract Text", command=self.extract_text_from_boxes)
         extract_button.pack(side=tk.LEFT)
@@ -51,20 +68,34 @@ class PDFViewer(tk.Tk):
         clear_button.pack(side=tk.LEFT)
 
     def on_click(self, event):
-        self.start_x = self.canvas.canvasx(event.x)
-        self.start_y = self.canvas.canvasy(event.y)
+        self.start_x = self.canvas.canvasx(event.x) / self.zoom_scale
+        self.start_y = self.canvas.canvasy(event.y) / self.zoom_scale
 
         if self.current_rect:
             self.canvas.delete(self.current_rect)
 
-        self.current_rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red", width=2)
+        self.current_rect = self.canvas.create_rectangle(
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale, 
+            outline="red", width=2
+        )
 
     def on_drag(self, event):
-        self.canvas.coords(self.current_rect, self.start_x, self.start_y, self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+        cur_x = self.canvas.canvasx(event.x) / self.zoom_scale
+        cur_y = self.canvas.canvasy(event.y) / self.zoom_scale
+        self.canvas.coords(
+            self.current_rect,
+            self.start_x * self.zoom_scale, self.start_y * self.zoom_scale,
+            cur_x * self.zoom_scale, cur_y * self.zoom_scale
+        )
 
     def on_release(self, event):
         if self.current_rect:
             x1, y1, x2, y2 = self.canvas.coords(self.current_rect)
+            x1 /= self.zoom_scale
+            y1 /= self.zoom_scale
+            x2 /= self.zoom_scale
+            y2 /= self.zoom_scale
             if x1 != x2 and y1 != y2:  # Ensure the rectangle is not degenerate
                 box_name = simpledialog.askstring("Box Name", "Enter a name for the data in the box:")
                 if box_name:
@@ -74,37 +105,43 @@ class PDFViewer(tk.Tk):
                         'coords': (x1, y1, x2, y2)
                     })
             self.current_rect = None
+            self.load_page()
 
     def prev_page(self):
         if self.current_page_number > 0:
-            self.save_current_page_boxes()
             self.current_page_number -= 1
             self.load_page()
 
     def next_page(self):
         if self.current_page_number < len(self.doc) - 1:
-            self.save_current_page_boxes()
             self.current_page_number += 1
             self.load_page()
         else:
             messagebox.showinfo("Info", "No more pages to go forward.")
 
     def load_page(self):
-        self.page = self.doc.load_page(self.current_page_number)
-        self.pagemap = self.page.get_pixmap()
-        self.image = Image.frombytes("RGB", [self.pagemap.width, self.pagemap.height], self.pagemap.samples)
-        self.img_tk = ImageTk.PhotoImage(image=self.image)
+        try:
+            self.page = self.doc.load_page(self.current_page_number)
+            self.pagemap = self.page.get_pixmap(matrix=fitz.Matrix(self.zoom_scale, self.zoom_scale))
+            self.image = Image.frombytes("RGB", [self.pagemap.width, self.pagemap.height], self.pagemap.samples)
+            self.img_tk = ImageTk.PhotoImage(image=self.image)
 
-        self.canvas.delete("all")
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=self.img_tk)
+            self.canvas.delete("all")
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=self.img_tk)
 
-        self.draw_rectangles()
+            self.draw_rectangles()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load page: {e}")
 
     def draw_rectangles(self):
         page_key = f"page number: {self.current_page_number + 1}"
         if page_key in self.rectangles:
             for box in self.rectangles[page_key]:
                 x1, y1, x2, y2 = box['coords']
+                x1 *= self.zoom_scale
+                y1 *= self.zoom_scale
+                x2 *= self.zoom_scale
+                y2 *= self.zoom_scale
                 self.canvas.create_rectangle(x1, y1, x2, y2, outline="red", width=2, tags=box['name'])
 
     def save_current_page_boxes(self):
@@ -142,11 +179,11 @@ class PDFViewer(tk.Tk):
             text = self.page.get_text("text", clip=pdf_rect)
             extracted_text.append(f"{box['name']}: {text}")
 
-        if extracted_text:
-            plt.figure(figsize=(10, 7))
-            plt.text(0.5, 0.5, '\n'.join(extracted_text), fontsize=12, ha='center', wrap=True)
-            plt.axis('off')
-            plt.show()
+    def display_extracted_text(self, text):
+        plt.figure(figsize=(10, 7))
+        plt.text(0.5, 0.5, text, fontsize=12, ha='center', wrap=True)
+        plt.axis('off')
+        plt.show()
 
     def save_boxes(self):
         save_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
@@ -160,8 +197,7 @@ class PDFViewer(tk.Tk):
     def delete_top_rectangle(self):
         page_key = f"page number: {self.current_page_number + 1}"
         if page_key in self.rectangles and self.rectangles[page_key]:
-            top_box = self.rectangles[page_key].pop()
-            self.canvas.delete(top_box['name'])
+            self.rectangles[page_key].pop()
         self.load_page()
 
     def clear_boxes(self):
@@ -171,11 +207,10 @@ class PDFViewer(tk.Tk):
         self.canvas.delete("all")
         self.load_page()
 
-def main():
-    pdf_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
-    if pdf_path:
-        app = PDFViewer(pdf_path)
-        app.mainloop()
+    def zoom_in(self):
+        self.zoom_scale *= 1.2
+        self.load_page()
 
-if __name__ == "__main__":
-    main()
+    def zoom_out(self):
+        self.zoom_scale /= 1.2
+        self.load_page()
