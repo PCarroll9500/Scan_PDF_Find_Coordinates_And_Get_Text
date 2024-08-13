@@ -6,6 +6,7 @@
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import os
 from Import_Document_To_Train import PDFViewer 
 
 # Function to import a document
@@ -26,9 +27,11 @@ def import_document():
 
 # Function to scan a folder and extract data
 def scan_folder_extract_data():
-    folder_path = filedialog.askdirectory()
+    json_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
+    if json_path:
+        folder_path = filedialog.askdirectory()
     if folder_path:
-        messagebox.showinfo("Folder Selected", f"Folder {folder_path} has been selected.")
+        messagebox.showinfo("Folder Selected", f"Folder {folder_path} has been selected./n JSON file {json_path} has been selected.")
         # Add your scanning and data extraction code here
 
 # Function to import and view in Excel
