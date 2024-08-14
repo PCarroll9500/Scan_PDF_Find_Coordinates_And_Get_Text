@@ -1,10 +1,11 @@
-import fitz  # PyMuPDF
+import pymupdf as pmu
 import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from PIL import Image, ImageTk
 import json
 import matplotlib.pyplot as plt
 
+# TODO: add ability to adjust boxes?
 class PDFViewer(tk.Tk):
     def __init__(self, pdf_path):
         super().__init__()
@@ -17,7 +18,7 @@ class PDFViewer(tk.Tk):
         self.current_rect = None
         self.start_x = self.start_y = 0
 
-        self.doc = fitz.open(pdf_path)
+        self.doc = pmu.open(pdf_path)
         self.canvas = tk.Canvas(self, bg='white')
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
@@ -57,10 +58,12 @@ class PDFViewer(tk.Tk):
         if self.current_rect:
             self.canvas.delete(self.current_rect)
 
-        self.current_rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y, outline="red", width=2)
+        self.current_rect = self.canvas.create_rectangle(self.start_x, self.start_y, self.start_x, self.start_y,
+                                                         outline="red", width=2)
 
     def on_drag(self, event):
-        self.canvas.coords(self.current_rect, self.start_x, self.start_y, self.canvas.canvasx(event.x), self.canvas.canvasy(event.y))
+        self.canvas.coords(self.current_rect, self.start_x, self.start_y, self.canvas.canvasx(event.x),
+                           self.canvas.canvasy(event.y))
 
     def on_release(self, event):
         if self.current_rect:
@@ -123,7 +126,7 @@ class PDFViewer(tk.Tk):
                         })
                 else:
                     print(f"Warning: Rectangle '{tag}' not found on canvas.")
-            
+
             if updated_boxes:  # Only update if there are valid boxes
                 self.rectangles[page_key] = updated_boxes
             else:
@@ -138,7 +141,7 @@ class PDFViewer(tk.Tk):
             page_width, page_height = self.page.rect.width, self.page.rect.height
             img_width, img_height = self.img_tk.width(), self.img_tk.height()
             scale_x, scale_y = page_width / img_width, page_height / img_height
-            pdf_rect = fitz.Rect(x1 * scale_x, y1 * scale_y, x2 * scale_x, y2 * scale_y)
+            pdf_rect = pmu.Rect(x1 * scale_x, y1 * scale_y, x2 * scale_x, y2 * scale_y)
             text = self.page.get_text("text", clip=pdf_rect)
             extracted_text.append(f"{box['name']}: {text}")
 
@@ -171,11 +174,13 @@ class PDFViewer(tk.Tk):
         self.canvas.delete("all")
         self.load_page()
 
+
 def main():
     pdf_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
     if pdf_path:
         app = PDFViewer(pdf_path)
         app.mainloop()
+
 
 if __name__ == "__main__":
     main()
