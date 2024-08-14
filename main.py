@@ -6,8 +6,8 @@
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import os
-from Import_Document_To_Train import PDFViewer 
+from Import_Document_To_Train import PDFViewer
+from Scan_Folder_Extract_Data import Create_OBJ_of_Scan_Folder 
 
 # Function to import a document
 def import_document():
@@ -27,19 +27,12 @@ def import_document():
 
 # Function to scan a folder and extract data
 def scan_folder_extract_data():
-    json_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
+    json_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
     if json_path:
         folder_path = filedialog.askdirectory()
     if folder_path:
-        messagebox.showinfo("Folder Selected", f"Folder {folder_path} has been selected./n JSON file {json_path} has been selected.")
-        # Add your scanning and data extraction code here
-
-# Function to import and view in Excel
-def view_excel():
-    file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-    if file_path:
-        messagebox.showinfo("File Selected", f"CSV file {file_path} has been selected.")
-        # Add your CSV handling and Excel viewing code here
+        viewer = Create_OBJ_of_Scan_Folder(folder_path, json_path)
+        viewer.scan_folder()
 
 # Create the main window
 root = tk.Tk()
@@ -74,9 +67,6 @@ btn_import_document.pack(pady=10)
 
 btn_scan_folder = tk.Button(root, text="Scan Folder and Extract Data", **btn_style, command=scan_folder_extract_data)
 btn_scan_folder.pack(pady=10)
-
-btn_import_excel = tk.Button(root, text="View in Excel", **btn_style, command=view_excel)
-btn_import_excel.pack(pady=10)
 
 # Run the main loop
 root.mainloop()

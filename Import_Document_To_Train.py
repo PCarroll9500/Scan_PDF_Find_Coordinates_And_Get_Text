@@ -61,7 +61,7 @@ class PDFViewer(tk.Toplevel):  # Use Toplevel instead of Tk
         save_button = tk.Button(button_frame, text="Save Boxes", command=self.save_boxes)
         save_button.pack(side=tk.LEFT)
 
-        delete_top_button = tk.Button(button_frame, text="Delete Top Box", command=self.delete_top_rectangle)
+        delete_top_button = tk.Button(button_frame, text="Delete Last Box", command=self.delete_top_rectangle)
         delete_top_button.pack(side=tk.LEFT)
 
         clear_button = tk.Button(button_frame, text="Clear Boxes", command=self.clear_boxes)
