@@ -21,3 +21,6 @@
 
 
 ![Diagram For PDF Coordinatesvg](https://github.com/user-attachments/assets/c637cc7e-18ba-4461-99ae-41752ec600dd)
+
+# DLA disposition services 1348-1A form help page
+https://www.dla.mil/Disposition-Services/DDSR/Turn-In/1348-Help/
