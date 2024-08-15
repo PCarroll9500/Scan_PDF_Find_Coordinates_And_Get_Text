@@ -334,8 +334,8 @@ def populate_spreadsheet(fields, pdf_name, sheet) -> None:
     # Create full file path for hyperlink to the original file
     pdf_name = pdf_name.replace(" ", "_")
     # TODO: uncomment before production *******************************************************************************
-    # folder = "./Scanned"
-    folder = "./To Scan"
+    # folder = os.path.abspath("./Scanned")
+    folder = os.path.abspath("./To Scan")
     pdf_link_name = os.path.join(folder, pdf_name)
 
     # Check if the sheet already has headers

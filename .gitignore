@@ -4,3 +4,52 @@ __pycache__/rectangle_manager.cpython-311.pyc
 __pycache__/pdf_document.cpython-311.pyc
 __pycache__/Import_Document_To_Train.cpython-312.pyc
 /env
+
+# .gitignore
+.gitignore.txt
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pyre type checker
+.pyre/
+
+# PyCharm
+.idea/
+.idea/*.xml
+*.iml
+out/
+
+# Other config files
+*.toml
+*.ini
+
+# Local History for IntelliJ-based IDEs
+.idea/.idea/
+.idea/.local_history/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/libraries
+.idea/modules.xml
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Excel
+*.xlsx
