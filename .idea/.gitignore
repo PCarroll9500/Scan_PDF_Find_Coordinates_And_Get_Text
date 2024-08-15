@@ -1,0 +1,40 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pyre type checker
+.pyre/
+
+# PyCharm
+.idea/
+.idea/*.xml
+*.iml
+out/
+
+# Other config files
+*.toml
+*.ini
+
+# Local History for IntelliJ-based IDEs
+.idea/.idea/
+.idea/.local_history/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/libraries
+.idea/modules.xml
+

@@ -9,18 +9,14 @@ from tkinter import filedialog, messagebox
 import os
 from Import_Document_To_Train import PDFViewer
 import os
-
-# Define the folder paths for the to scan and scanned folders
-to_scan_folder = 'To Scan'
-scanned_folder = 'Scanned'
-form_templates_folder = 'Form Templates'
+import Scan_Folder_Extract_Data as sfe
 
 # Create the folders if they don't exist
-os.makedirs(to_scan_folder, exist_ok=True)
-os.makedirs(scanned_folder, exist_ok=True)
-os.makedirs(form_templates_folder, exist_ok=True)
+os.makedirs("To Scan", exist_ok=True)
+os.makedirs("Scanned", exist_ok=True)
+os.makedirs("Form Templates", exist_ok=True)
 
-print(f"Folders set up: '{to_scan_folder}', '{scanned_folder}' and '{form_templates_folder}'")
+print(f"Folders set up: 'To Scan', 'Scanned', 'Form Templates'")
 
 
 # Function to import a document
@@ -41,12 +37,8 @@ def import_document():
 
 # Function to scan a folder and extract data
 def scan_folder_extract_data():
-    json_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON Files", "*.json")])
-    if json_path:
-        folder_path = filedialog.askdirectory()
-    if folder_path:
-        messagebox.showinfo("Folder Selected", f"Folder {folder_path} has been selected./n JSON file {json_path} has been selected.")
-        # Add your scanning and data extraction code here
+    sfe.main()
+
 
 # Function to import and view in Excel
 def view_excel():
@@ -93,6 +85,8 @@ if __name__ == "__main__":
 
     btn_import_excel = tk.Button(root, text="View in Excel", **btn_style, command=view_excel)
     btn_import_excel.pack(pady=10)
+
+    # TODO: exit button?
 
     # Run the main loop
     root.mainloop()
